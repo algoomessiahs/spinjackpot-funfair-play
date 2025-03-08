@@ -10,6 +10,12 @@ import {
 } from '@/utils/slotUtils';
 import { toast } from 'sonner';
 
+// Define the return type explicitly
+export interface SpinLogicReturn {
+  spin: () => void;
+  autoPlayTimerRef: MutableRefObject<number | null> | null;
+}
+
 export const useSpinLogic = (
   state: SlotMachineState,
   setState: React.Dispatch<React.SetStateAction<SlotMachineState>>,
@@ -20,7 +26,7 @@ export const useSpinLogic = (
   forceWinRef: MutableRefObject<boolean>,
   forceJackpotRef: MutableRefObject<boolean>,
   autoPlayTimerRef: MutableRefObject<number | null> | null
-) => {
+): SpinLogicReturn => {
   // The actual spin function
   const spin = useCallback(() => {
     // Don't allow spin if already spinning or if balance < bet amount
@@ -194,5 +200,8 @@ export const useSpinLogic = (
     autoPlayTimerRef
   ]);
 
-  return { spin };
+  return { 
+    spin,
+    autoPlayTimerRef 
+  };
 };

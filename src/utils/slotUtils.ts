@@ -1,4 +1,3 @@
-
 // Symbol types
 export type SymbolType = 
   | 'seven' 
@@ -42,17 +41,17 @@ export const ALL_SYMBOLS: SymbolType[] = [
   'seven', 'banana', 'melon', 'lemon', 'bar', 'bell', 'orange', 'plum', 'cherry'
 ];
 
-// Symbol paths
+// Symbol paths - using individual images for each symbol
 export const SYMBOL_IMAGES: Record<SymbolType, string> = {
-  seven: "/lovable-uploads/c5c7a226-2be6-4284-a1c6-b4a693db5e58.png",
-  banana: "/lovable-uploads/c5c7a226-2be6-4284-a1c6-b4a693db5e58.png",
-  melon: "/lovable-uploads/c5c7a226-2be6-4284-a1c6-b4a693db5e58.png",
-  lemon: "/lovable-uploads/c5c7a226-2be6-4284-a1c6-b4a693db5e58.png",
-  bar: "/lovable-uploads/c5c7a226-2be6-4284-a1c6-b4a693db5e58.png",
-  bell: "/lovable-uploads/c5c7a226-2be6-4284-a1c6-b4a693db5e58.png",
-  orange: "/lovable-uploads/c5c7a226-2be6-4284-a1c6-b4a693db5e58.png",
-  plum: "/lovable-uploads/c5c7a226-2be6-4284-a1c6-b4a693db5e58.png",
-  cherry: "/lovable-uploads/c5c7a226-2be6-4284-a1c6-b4a693db5e58.png"
+  seven: "/images/seven.png",
+  banana: "/images/banana.png",
+  melon: "/images/melon.png",
+  lemon: "/images/lemon.png",
+  bar: "/images/bar.png",
+  bell: "/images/bell.png",
+  orange: "/images/orange.png",
+  plum: "/images/plum.png",
+  cherry: "/images/cherry.png"
 };
 
 // Generate a single reel based on weights

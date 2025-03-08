@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { 
   ALL_SYMBOLS,
@@ -127,9 +126,9 @@ export function useSlotMachine(): UseSlotMachineReturn {
   
   // Function to reset the game
   const resetGame = useCallback(() => {
-    stopAutoPlay();
+    stopAutoPlayBase(setState);
     setState(initialState);
-  }, [stopAutoPlay]);
+  }, [stopAutoPlayBase]);
 
   return {
     ...state,

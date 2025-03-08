@@ -10,7 +10,7 @@ import {
   checkJackpotWin,
   generateReelDelays
 } from '@/utils/slotUtils';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 // Define the types for our hook
 interface SlotMachineState {
@@ -37,6 +37,10 @@ interface UseSlotMachineReturn extends SlotMachineState {
   toggleSound: () => void;
   setBetAmount: (amount: number) => void;
   resetGame: () => void;
+  setJackpotAmount: (amount: number) => void; // New developer method
+  setBalance: (amount: number) => void; // New developer method
+  forceWin: () => void; // New developer method
+  forceJackpot: () => void; // New developer method
   spinSound: HTMLAudioElement | null;
   winSound: HTMLAudioElement | null;
   jackpotSound: HTMLAudioElement | null;
@@ -82,6 +86,10 @@ export function useSlotMachine(): UseSlotMachineReturn {
   const winSoundRef = useRef<HTMLAudioElement | null>(null);
   const jackpotSoundRef = useRef<HTMLAudioElement | null>(null);
   const autoPlayTimerRef = useRef<number | null>(null);
+  
+  // Flag to force a win on next spin (for development)
+  const forceWinRef = useRef(false);
+  const forceJackpotRef = useRef(false);
 
   // Initialize sounds
   useEffect(() => {
@@ -105,6 +113,35 @@ export function useSlotMachine(): UseSlotMachineReturn {
     }
   }, [state.soundEnabled]);
 
+  // Developer functions
+  const setJackpotAmount = useCallback((amount: number) => {
+    setState(prev => ({
+      ...prev,
+      jackpotAmount: amount
+    }));
+  }, []);
+
+  const setBalance = useCallback((amount: number) => {
+    setState(prev => ({
+      ...prev,
+      balance: amount
+    }));
+  }, []);
+
+  const forceWin = useCallback(() => {
+    forceWinRef.current = true;
+    toast.info("Win will be forced on next spin", {
+      duration: 3000,
+    });
+  }, []);
+
+  const forceJackpot = useCallback(() => {
+    forceJackpotRef.current = true;
+    toast.info("Jackpot win will be forced on next spin", {
+      duration: 3000,
+    });
+  }, []);
+
   // Function to handle a single spin
   const spin = useCallback(() => {
     // Don't allow spin if already spinning or not enough balance
@@ -115,8 +152,35 @@ export function useSlotMachine(): UseSlotMachineReturn {
       return;
     }
 
-    // Generate new reel results
-    const newReels = generateSpinResult();
+    // Generate new reel results - with developer override if needed
+    let newReels;
+    if (forceWinRef.current) {
+      // Create a winning combination (same symbol on middle row)
+      const winningSymbol = 'bell'; // Medium payout symbol
+      newReels = [
+        [...ALL_SYMBOLS],
+        [...ALL_SYMBOLS],
+        [...ALL_SYMBOLS]
+      ];
+      // Ensure the middle position for each reel will show the winning symbol
+      newReels[0][1] = winningSymbol;
+      newReels[1][1] = winningSymbol;
+      newReels[2][1] = winningSymbol;
+      forceWinRef.current = false; // Reset the flag
+    } else if (forceJackpotRef.current) {
+      // Create a full jackpot winning combination (all same symbols)
+      const jackpotSymbol = 'seven'; // Highest payout symbol
+      newReels = [
+        Array(9).fill(jackpotSymbol) as SymbolType[],
+        Array(9).fill(jackpotSymbol) as SymbolType[],
+        Array(9).fill(jackpotSymbol) as SymbolType[]
+      ];
+      forceJackpotRef.current = false; // Reset the flag
+    } else {
+      // Normal random result
+      newReels = generateSpinResult();
+    }
+
     const delays = generateReelDelays();
     
     // Play spin sound
@@ -170,8 +234,8 @@ export function useSlotMachine(): UseSlotMachineReturn {
             newBalance += actualWin;
             newWinningLines = wins;
             
-            // Check for jackpot win
-            const jackpotWon = checkJackpotWin(prev.jackpotAmount);
+            // Check for jackpot win - developer override if forcing jackpot
+            const jackpotWon = forceJackpotRef.current === true || checkJackpotWin(prev.jackpotAmount);
             
             if (jackpotWon) {
               playSound(jackpotSoundRef.current);
@@ -312,6 +376,10 @@ export function useSlotMachine(): UseSlotMachineReturn {
     toggleSound,
     setBetAmount,
     resetGame,
+    setJackpotAmount,
+    setBalance,
+    forceWin,
+    forceJackpot,
     spinSound: spinSoundRef.current,
     winSound: winSoundRef.current,
     jackpotSound: jackpotSoundRef.current

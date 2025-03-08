@@ -6,6 +6,7 @@ import BetControls from './BetControls';
 import JackpotDisplay from './JackpotDisplay';
 import InfoModal from './InfoModal';
 import PayTable from './PayTable';
+import DevTools from './DevTools';
 import { Button } from '@/components/ui/button';
 import { Info, Menu } from 'lucide-react';
 
@@ -26,7 +27,11 @@ const SlotMachine: React.FC = () => {
     toggleAutoPlay,
     toggleSound,
     setBetAmount,
-    resetGame
+    resetGame,
+    setJackpotAmount,
+    setBalance,
+    forceWin,
+    forceJackpot
   } = useSlotMachine();
 
   const [infoOpen, setInfoOpen] = useState(false);
@@ -138,6 +143,16 @@ const SlotMachine: React.FC = () => {
       <PayTable 
         open={payTableOpen} 
         onOpenChange={setPayTableOpen} 
+      />
+      
+      {/* Developer Tools (only visible in development) */}
+      <DevTools
+        jackpotAmount={jackpotAmount}
+        balance={balance}
+        onSetJackpot={setJackpotAmount}
+        onSetBalance={setBalance}
+        onForceWin={forceWin}
+        onForceJackpot={forceJackpot}
       />
     </div>
   );

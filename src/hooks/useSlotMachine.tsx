@@ -61,7 +61,20 @@ export function useSlotMachine(): UseSlotMachineReturn {
   // Initialize sound effects
   const { spinSoundRef, winSoundRef, jackpotSoundRef, playSound } = useSoundEffects(state.soundEnabled);
   
-  // Set up spin logic (needs spin reference too)
+  // Set up auto play (need to create this first because of the circular dependency)
+  const { 
+    autoPlayTimerRef, 
+    toggleAutoPlay: toggleAutoPlayBase, 
+    stopAutoPlay: stopAutoPlayBase 
+  } = useAutoPlay(
+    state.autoPlay, 
+    state.spinning, 
+    state.balance, 
+    state.betAmount,
+    null // We'll update this after creating spinLogicHandler
+  );
+  
+  // Set up spin logic
   const spinLogicHandler = useSpinLogic(
     state,
     setState,
@@ -71,22 +84,11 @@ export function useSlotMachine(): UseSlotMachineReturn {
     jackpotSoundRef,
     forceWinRef,
     forceJackpotRef,
-    null // We'll update this after creating autoPlayTimerRef
+    autoPlayTimerRef
   );
+  
+  // Update the circular dependencies
   const { spin } = spinLogicHandler;
-  
-  // Set up auto play 
-  const autoPlayHandler = useAutoPlay(
-    state.autoPlay, 
-    state.spinning, 
-    state.balance, 
-    state.betAmount,
-    spin
-  );
-  const { autoPlayTimerRef, toggleAutoPlay: toggleAutoPlayBase, stopAutoPlay: stopAutoPlayBase } = autoPlayHandler;
-  
-  // Update the timerRef in spin logic
-  spinLogicHandler.autoPlayTimerRef = autoPlayTimerRef;
   
   // Function to toggle sound
   const toggleSound = useCallback(() => {
@@ -107,13 +109,25 @@ export function useSlotMachine(): UseSlotMachineReturn {
     }));
   }, []);
 
-  // Wrapper functions
+  // Function to set max bet
+  const setMaxBet = useCallback(() => {
+    setBetAmount(MAX_BET);
+  }, []);
+
+  // Function to set min bet
+  const setMinBet = useCallback(() => {
+    setBetAmount(MIN_BET);
+  }, []);
+
+  // Wrapper functions that correctly handle the function returned by toggleAutoPlayBase
   const toggleAutoPlay = useCallback(() => {
-    toggleAutoPlayBase()(setState);
-  }, [toggleAutoPlayBase]);
+    const updateFn = toggleAutoPlayBase(spin);
+    updateFn(setState);
+  }, [toggleAutoPlayBase, spin]);
   
   const stopAutoPlay = useCallback(() => {
-    stopAutoPlayBase()(setState);
+    const updateFn = stopAutoPlayBase();
+    updateFn(setState);
   }, [stopAutoPlayBase]);
   
   const setJackpotAmount = useCallback((amount: number) => {
@@ -126,7 +140,8 @@ export function useSlotMachine(): UseSlotMachineReturn {
   
   // Function to reset the game
   const resetGame = useCallback(() => {
-    stopAutoPlayBase()(setState);
+    const updateFn = stopAutoPlayBase();
+    updateFn(setState);
     setState(initialState);
   }, [stopAutoPlayBase]);
 
@@ -137,6 +152,8 @@ export function useSlotMachine(): UseSlotMachineReturn {
     toggleAutoPlay,
     toggleSound,
     setBetAmount,
+    setMaxBet,
+    setMinBet,
     resetGame,
     setJackpotAmount,
     setBalance,

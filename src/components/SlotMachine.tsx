@@ -8,7 +8,7 @@ import InfoModal from './InfoModal';
 import PayTable from './PayTable';
 import DevTools from './DevTools';
 import { Button } from '@/components/ui/button';
-import { Info, Menu } from 'lucide-react';
+import { Info, Menu, LifeBuoy } from 'lucide-react';
 
 const SlotMachine: React.FC = () => {
   const {
@@ -27,6 +27,8 @@ const SlotMachine: React.FC = () => {
     toggleAutoPlay,
     toggleSound,
     setBetAmount,
+    setMaxBet,
+    setMinBet,
     resetGame,
     setJackpotAmount,
     setBalance,
@@ -36,6 +38,7 @@ const SlotMachine: React.FC = () => {
 
   const [infoOpen, setInfoOpen] = useState(false);
   const [payTableOpen, setPayTableOpen] = useState(false);
+  const [devToolsOpen, setDevToolsOpen] = useState(false);
 
   const generateReelDelays = () => {
     return [
@@ -52,7 +55,7 @@ const SlotMachine: React.FC = () => {
       <div className="flex flex-col items-center">
         {/* Top Bar with Balance and Menu */}
         <div className="w-full flex justify-between items-center mb-4">
-          <div className="glass-morphism px-4 py-2 rounded-lg">
+          <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg shadow-sm">
             <span className="text-sm opacity-80">Balance</span>
             <div className="text-xl font-bold">{balance.toFixed(2)}</div>
           </div>
@@ -62,7 +65,7 @@ const SlotMachine: React.FC = () => {
               variant="outline"
               size="icon"
               onClick={() => setPayTableOpen(true)}
-              className="glass-morphism"
+              className="bg-white/10 backdrop-blur-md hover:bg-white/20"
             >
               <Menu className="h-5 w-5" />
             </Button>
@@ -71,9 +74,18 @@ const SlotMachine: React.FC = () => {
               variant="outline"
               size="icon"
               onClick={() => setInfoOpen(true)}
-              className="glass-morphism"
+              className="bg-white/10 backdrop-blur-md hover:bg-white/20"
             >
               <Info className="h-5 w-5" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setDevToolsOpen(!devToolsOpen)}
+              className={`bg-white/10 backdrop-blur-md hover:bg-white/20 ${devToolsOpen ? 'ring-2 ring-primary' : ''}`}
+            >
+              <LifeBuoy className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -82,7 +94,7 @@ const SlotMachine: React.FC = () => {
         <JackpotDisplay amount={jackpotAmount} lastWin={lastWin} />
         
         {/* Slot Machine */}
-        <div className="slot-machine w-full aspect-[4/3] max-w-[640px] flex flex-col bg-gradient-to-b from-slot-machine to-black rounded-xl overflow-hidden shadow-2xl border border-white/5">
+        <div className="slot-machine w-full aspect-[4/3] max-w-[640px] flex flex-col bg-gradient-to-b from-sky-100/10 to-indigo-200/5 rounded-xl overflow-hidden shadow-lg border border-white/10">
           {/* Winning Lines Overlay */}
           <div className="relative w-full h-full flex justify-center items-center">
             {/* Slot Reels Container */}
@@ -105,13 +117,12 @@ const SlotMachine: React.FC = () => {
             {winningLines.map((win, index) => (
               <div
                 key={index}
-                className={`win-line ${!spinning ? 'active' : ''}`}
+                className={`absolute h-[3px] ${!spinning ? 'animate-pulse bg-yellow-400' : 'bg-transparent'}`}
                 style={{
                   top: `${120 * win.line + 60 + 16}px`, // Align with the middle of the row + padding
                   left: '20px',
                   right: '20px',
-                  height: '0',
-                  borderColor: 'rgba(255, 215, 0, 0.8)'
+                  boxShadow: '0 0 8px rgba(255, 215, 0, 0.8)'
                 }}
               />
             ))}
@@ -130,6 +141,8 @@ const SlotMachine: React.FC = () => {
           onAutoPlayToggle={autoPlay ? stopAutoPlay : toggleAutoPlay}
           onSoundToggle={toggleSound}
           onReset={resetGame}
+          onMinBet={setMinBet}
+          onMaxBet={setMaxBet}
         />
       </div>
       
@@ -145,15 +158,22 @@ const SlotMachine: React.FC = () => {
         onOpenChange={setPayTableOpen} 
       />
       
-      {/* Developer Tools (only visible in development) */}
-      <DevTools
-        jackpotAmount={jackpotAmount}
-        balance={balance}
-        onSetJackpot={setJackpotAmount}
-        onSetBalance={setBalance}
-        onForceWin={forceWin}
-        onForceJackpot={forceJackpot}
-      />
+      {/* Developer Tools (only visible when toggled) */}
+      {devToolsOpen && (
+        <div className="mt-8 p-4 bg-white/10 backdrop-blur-md rounded-lg border border-white/20">
+          <h3 className="text-lg font-semibold mb-2">Developer Tools</h3>
+          <p className="text-sm mb-4">Use these tools to test different scenarios of the slot machine.</p>
+          
+          <DevTools
+            jackpotAmount={jackpotAmount}
+            balance={balance}
+            onSetJackpot={setJackpotAmount}
+            onSetBalance={setBalance}
+            onForceWin={forceWin}
+            onForceJackpot={forceJackpot}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 
 import React, { useRef, useEffect } from 'react';
-import { SymbolType, SYMBOL_IMAGES } from '@/utils/slotUtils';
+import { SymbolType } from '@/utils/slotUtils';
 
 interface SlotReelProps {
   symbols: SymbolType[];
@@ -47,7 +47,7 @@ const SlotReel: React.FC<SlotReelProps> = ({
   }, [spinning, position, delay]);
 
   return (
-    <div className="slot-reel w-1/3 h-[360px] bg-slot-machine rounded-lg overflow-hidden relative">
+    <div className="slot-reel w-1/3 h-[360px] bg-white/5 rounded-lg overflow-hidden relative shadow-md border border-white/10">
       <div 
         ref={reelRef}
         className={`flex flex-col transition-transform ${winning ? 'win-animation' : ''}`}
@@ -62,14 +62,13 @@ const SlotReel: React.FC<SlotReelProps> = ({
               key={`${i}-${j}`}
               className={`slot-symbol h-[120px] flex items-center justify-center p-2 border-b border-white/10`}
             >
-              <img 
-                src={SYMBOL_IMAGES[symbol]} 
-                alt={symbol} 
-                className="max-h-full max-w-full object-contain"
-                style={{ 
-                  filter: winning ? 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))' : 'none'
-                }}
-              />
+              <div 
+                className={`w-full h-full flex items-center justify-center rounded-md 
+                  ${winning ? 'animate-pulse shadow-[0_0_15px_rgba(255,255,255,0.5)]' : ''}
+                  bg-gradient-to-b from-white/10 to-transparent`}
+              >
+                <span className="text-lg font-bold text-white">{symbol}</span>
+              </div>
             </div>
           ))
         ))}

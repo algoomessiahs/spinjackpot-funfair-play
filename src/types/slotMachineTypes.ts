@@ -1,7 +1,13 @@
 
-import { SymbolType } from '@/utils/slotUtils';
+import { SymbolType } from "@/utils/slotUtils";
 
-// State interface for the slot machine
+// Constants
+export const MIN_BET = 1;
+export const MAX_BET = 10;
+export const INITIAL_BALANCE = 100;
+export const INITIAL_JACKPOT = 50;
+
+// Main state interface
 export interface SlotMachineState {
   reels: SymbolType[][];
   spinning: boolean;
@@ -26,6 +32,8 @@ export interface UseSlotMachineReturn extends SlotMachineState {
   toggleAutoPlay: () => void;
   toggleSound: () => void;
   setBetAmount: (amount: number) => void;
+  setMaxBet: () => void;
+  setMinBet: () => void;
   resetGame: () => void;
   setJackpotAmount: (amount: number) => void;
   setBalance: (amount: number) => void;
@@ -35,11 +43,3 @@ export interface UseSlotMachineReturn extends SlotMachineState {
   winSound: HTMLAudioElement | null;
   jackpotSound: HTMLAudioElement | null;
 }
-
-// Constants for the slot machine
-export const MIN_BET = 0.5;
-export const MAX_BET = 10;
-export const INITIAL_BALANCE = 100;
-export const INITIAL_JACKPOT = 50;
-export const HOUSE_EDGE = 0.05; // 5% house edge
-export const AUTO_PLAY_DELAY = 1500; // ms

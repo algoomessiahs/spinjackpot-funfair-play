@@ -50,12 +50,12 @@ export const useAutoPlay = (
 
   // Stop auto play
   const stopAutoPlay = useCallback(() => {
-    if (autoPlayTimerRef.current) {
-      window.clearTimeout(autoPlayTimerRef.current);
-      autoPlayTimerRef.current = null;
-    }
-    
     return (setState: any) => {
+      if (autoPlayTimerRef.current) {
+        window.clearTimeout(autoPlayTimerRef.current);
+        autoPlayTimerRef.current = null;
+      }
+      
       setState(prev => ({
         ...prev,
         autoPlay: false,

@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { 
   ALL_SYMBOLS,
@@ -60,16 +61,6 @@ export function useSlotMachine(): UseSlotMachineReturn {
   // Initialize sound effects
   const { spinSoundRef, winSoundRef, jackpotSoundRef, playSound } = useSoundEffects(state.soundEnabled);
   
-  // Set up auto play (needs spin reference which we'll define later)
-  const autoPlayHandler = useAutoPlay(
-    state.autoPlay, 
-    state.spinning, 
-    state.balance, 
-    state.betAmount,
-    () => {} // Placeholder, will be updated after spin function is created
-  );
-  const { autoPlayTimerRef, toggleAutoPlay: toggleAutoPlayBase, stopAutoPlay: stopAutoPlayBase } = autoPlayHandler;
-  
   // Set up spin logic (needs spin reference too)
   const spinLogicHandler = useSpinLogic(
     state,
@@ -80,13 +71,22 @@ export function useSlotMachine(): UseSlotMachineReturn {
     jackpotSoundRef,
     forceWinRef,
     forceJackpotRef,
-    autoPlayTimerRef
+    null // We'll update this after creating autoPlayTimerRef
   );
   const { spin } = spinLogicHandler;
   
-  // Connect spin function to autoPlay
-  // This is a bit of a hack since there's a circular dependency
-  (autoPlayHandler as any).spin = spin;
+  // Set up auto play 
+  const autoPlayHandler = useAutoPlay(
+    state.autoPlay, 
+    state.spinning, 
+    state.balance, 
+    state.betAmount,
+    spin
+  );
+  const { autoPlayTimerRef, toggleAutoPlay: toggleAutoPlayBase, stopAutoPlay: stopAutoPlayBase } = autoPlayHandler;
+  
+  // Update the timerRef in spin logic
+  spinLogicHandler.autoPlayTimerRef = autoPlayTimerRef;
   
   // Function to toggle sound
   const toggleSound = useCallback(() => {
@@ -109,11 +109,11 @@ export function useSlotMachine(): UseSlotMachineReturn {
 
   // Wrapper functions
   const toggleAutoPlay = useCallback(() => {
-    toggleAutoPlayBase(setState);
+    toggleAutoPlayBase()(setState);
   }, [toggleAutoPlayBase]);
   
   const stopAutoPlay = useCallback(() => {
-    stopAutoPlayBase(setState);
+    stopAutoPlayBase()(setState);
   }, [stopAutoPlayBase]);
   
   const setJackpotAmount = useCallback((amount: number) => {
@@ -126,7 +126,7 @@ export function useSlotMachine(): UseSlotMachineReturn {
   
   // Function to reset the game
   const resetGame = useCallback(() => {
-    stopAutoPlayBase(setState);
+    stopAutoPlayBase()(setState);
     setState(initialState);
   }, [stopAutoPlayBase]);
 
